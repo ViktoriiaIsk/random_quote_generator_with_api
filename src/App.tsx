@@ -1,35 +1,25 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import QuoteGenerator from "./components/QuoteGenerator";
+import "./App.css";
+
+const quotesList: string[] = [
+    "It is easy to sit up and take notice, what's difficult is getting up and taking action.",
+    "The best way to predict the future is to create it.",
+    "Your time is limited, so don’t waste it living someone else’s life.",
+    "It is easy to sit up and take notice, what's difficult is getting up and taking action.",
+    "Success is not the key to happiness. Happiness is the key to success.",
+    "Don’t watch the clock; do what it does. Keep going.",
+    "Opportunities don't happen. You create them.",
+    "Do what you can, with what you have, where you are.",
+    "Difficulties in life are intended to make us better, not bitter."
+];
+
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    return (
+        <div className="app-container">
+            <QuoteGenerator quotes={quotesList} />
+        </div>
+    );
 }
 
-export default App
+export default App;

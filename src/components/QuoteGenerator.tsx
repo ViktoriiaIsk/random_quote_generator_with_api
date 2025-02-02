@@ -1,52 +1,56 @@
+import useSWR from "swr";
 import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./icons.css"; 
+import "./icons.css";
 
-type QuoteGeneratorProps = {
-    quotes: string[];
-};
+// fetch advice from the API
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-const QuoteGenerator = ({ quotes }: QuoteGeneratorProps) => {
-    const [index, setIndex] = useState(Math.floor(Math.random() * quotes.length));
+const QuoteGenerator = () => {
+    // useSWR fetches data from the API and enables automatic revalidation
+    const { data, error, mutate } = useSWR("https://api.adviceslip.com/advice", fetcher, {
+        revalidateOnFocus: false, // Prevents re-fetching when the window regains focus
+    });
+    
+    const [lastId, setLastId] = useState<number | null>(null); 
 
-    const getRandomIndex = () => {
-        if (quotes.length <= 1) return; 
+    // Handle error state
+    if (error) return <p className="error">Failed to load advice.</p>;
+    if (!data) return <p className="loading">Loading...</p>;
 
-        const availableIndexes = quotes
-            .map((_, i) => i) 
-            .filter(i => i !== index); 
-
-        const randomIndex = availableIndexes[Math.floor(Math.random() * availableIndexes.length)];
-
-        setIndex(randomIndex);
+    const { advice, id } = data.slip; 
+    // Fetch a new advice, but only if it's different from the last one
+    const getNewQuote = async () => {
+        const newData = await mutate(); // Fetch new advice
+        if (newData && newData.slip.id === lastId) {
+            await mutate(); // Fetch again if the new advice is the same as the last one
+        }
+        setLastId(newData?.slip.id || null); // Update the last advice ID
     };
 
+
     const copyToClipboard = () => {
-        navigator.clipboard.writeText(quotes[index])
-            .then(() => {
-                toast.success("Quote copied to clipboard ✅");
-            })
-            .catch(() => {
-                toast.error("Failed to copy ❌");
-            });
+        navigator.clipboard.writeText(advice)
+            .then(() => toast.success("Quote copied to clipboard ✅"))
+            .catch(() => toast.error("Failed to copy ❌"));
     };
 
     return (
         <div className="quote-container">
-            <p className="advice">ADVICE #{index + 1}</p>
-            <p className="quote-text">“{quotes[index]}”</p>
+            <p className="advice">ADVICE #{id}</p>
+            <p className="quote-text">“{advice}”</p>
 
             <div className="divider">
-                <span className="pause-icon">||</span> 
+                <span className="pause-icon">||</span>
             </div>
 
             <div className="button-container">
-                <button className="button" onClick={getRandomIndex}>
-                    <span className="icon-dice"></span> 
+                <button className="button" onClick={getNewQuote}>
+                    <span className="icon-dice"></span>
                 </button>
                 <button className="button" onClick={copyToClipboard}>
-                    <span className="icon-copy"></span> 
+                    <span className="icon-copy"></span>
                 </button>
             </div>
 
